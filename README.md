@@ -1,16 +1,16 @@
 # Свадебное приглашение Данила и Натальи
 
-Финальная статическая версия свадебного сайта на Vite + React. Сайт можно бесплатно разместить на GitHub Pages, а ответы RSVP писать в Google Sheets через Apps Script.
+Статический свадебный сайт на Vite + React. Размещается бесплатно на GitHub Pages, а ответы RSVP отправляются в Google Таблицу через бесплатный Google Apps Script.
 
 ## Быстрый запуск
 
-Самый простой запуск на Windows:
+На Windows:
 
 ```bat
 start-site.bat
 ```
 
-Команды вручную:
+Вручную:
 
 ```powershell
 rtk powershell -NoProfile -Command "npm install"
@@ -18,42 +18,63 @@ rtk powershell -NoProfile -Command "npm run dev -- --port 5173"
 rtk powershell -NoProfile -Command "npm run build"
 ```
 
-`npm run test` запускает production-сборку.
-
 ## Что менять заказчику
 
-- `invite.config.js` - имена, дата, тексты, программа, адрес, дресс-код, контакты, список картинок.
-- `survey.config.js` - вопросы RSVP, типы ответов, варианты, текст формы, URL для Google Sheets.
-- `img/wedding-hero.png` - главный фон.
-- `img/photo-1.jpg`, `img/photo-2.jpg`, `img/photo-3.jpg` - фотографии в блоке галереи.
+Тексты сайта:
 
-Чтобы заменить фото, достаточно положить новый файл с тем же именем в `img`.
-В `invite.config.js` эти файлы указываются как `/wedding-hero.png`, `/photo-1.jpg` и так далее, потому что Vite публикует папку `img` в корень сайта.
+- `invite.config.js` - имена, дата, программа, адрес, дресс-код, контакты, тексты секций.
 
-## RSVP и ответы
+Опросник RSVP:
 
-Форма спрашивает имя, фамилию и вопросы из `survey.config.js`.
+- `survey.config.js` - текст модалки, вопросы, варианты ответов, ссылка `googleScriptUrl` для записи в Google Таблицу.
 
-Поддерживаемые типы вопросов:
+Фотографии:
+
+- `img/wedding-hero.png` - главный фон сайта и RSVP-модалки.
+- `img/photo-1.jpg`
+- `img/photo-2.jpg`
+- `img/photo-3.jpg`
+
+Чтобы заменить фото, положите новый файл в `img` с тем же именем. В `invite.config.js` пути пишутся как `/wedding-hero.png`, `/photo-1.jpg`, `/photo-2.jpg`, `/photo-3.jpg`, потому что Vite публикует папку `img` в корень сайта.
+
+## Как менять вопросы
+
+Откройте `survey.config.js` и редактируйте массив `questions`.
+
+Пример вопроса с одним вариантом:
+
+```js
+{
+  id: 'attendance',
+  title: 'Вы сможете быть с нами?',
+  type: 'radio',
+  required: true,
+  options: ['Да, с радостью буду', 'Пока не уверен(а)', 'К сожалению, не смогу'],
+}
+```
+
+Поддерживаемые типы:
 
 - `radio` - один вариант.
 - `checkbox` - несколько вариантов.
 - `select` - выпадающий список.
 - `textarea` - свободный текст.
 
-Ответы всегда сохраняются локально в браузере в админ-блоке `Админ: ответы гостей`. Их можно скачать JSON-файлом.
+При добавлении новых вопросов сайт сам отправит их названия в Google Таблицу, а Apps Script добавит недостающие колонки после первого ответа.
 
-Для настоящего сбора ответов от гостей нужен `googleScriptUrl` в `survey.config.js`. Бесплатная инструкция и код лежат в `deploy/README.md` и `deploy/google-sheets-apps-script.js`.
+## Как подключить ответы
 
-## Структура
+1. Создайте Google Таблицу.
+2. Откройте `Расширения -> Apps Script`.
+3. Вставьте код из `deploy/google-sheets-apps-script.js`.
+4. Нажмите `Deploy -> New deployment`.
+5. Тип: `Web app`.
+6. `Execute as`: `Me`.
+7. `Who has access`: `Anyone`.
+8. Скопируйте Web app URL.
+9. Вставьте его в `survey.config.js` в поле `googleScriptUrl`.
 
-- `src/App.jsx` - секции сайта и RSVP-форма.
-- `src/styles.css` - внешний вид.
-- `src/components/Aurora.jsx` - WebGL-фон, адаптирован из React Bits Aurora.
-- `src/config/site.js` - импортирует корневые конфиги.
-- `src/lib/rsvpStorage.js` - сохранение локально и отправка в Google Sheets.
-- `.github/workflows/pages.yml` - бесплатный деплой на GitHub Pages.
-- `start-site.bat` - локальный запуск с остановкой старого процесса на порту `5173`.
+После этого ответы гостей будут появляться в листе `RSVP` Google Таблицы. На сайте админки нет.
 
 ## Деплой бесплатно
 
@@ -62,13 +83,25 @@ rtk powershell -NoProfile -Command "npm run build"
 1. Запушить проект в GitHub в ветку `master`.
 2. Открыть `Settings -> Pages`.
 3. Выбрать `Source: GitHub Actions`.
-4. Workflow сам соберёт `dist` и опубликует сайт.
+4. Workflow `.github/workflows/pages.yml` сам соберёт `dist` и опубликует сайт.
 
-Подробности по Google Sheets для RSVP: `deploy/README.md`.
+## Структура
 
-## Заметки
+- `src/App.jsx` - секции сайта и пошаговая RSVP-модалка.
+- `src/styles.css` - внешний вид.
+- `src/components/Aurora.jsx` - WebGL-фон, адаптирован из React Bits Aurora.
+- `src/config/site.js` - импортирует корневые конфиги.
+- `src/lib/rsvpStorage.js` - отправляет ответы в Google Sheets.
+- `scripts/check-config.mjs` - проверяет картинки, вопросы и синтаксис Apps Script перед сборкой.
+- `deploy/google-sheets-apps-script.js` - бесплатная запись ответов в таблицу.
+- `start-site.bat` - локальный запуск с остановкой старого процесса на порту `5173`.
 
-- Старый `CNAME` шаблона удалён.
-- Старые Gulp/jQuery-интеграции исходного шаблона больше не используются.
-- Кнопка RSVP теперь обычная стабильная кнопка без магнитного движения.
-- `dist/`, `node_modules/` и `logs/` не коммитятся.
+В проекте намеренно оставлены только рабочие файлы Vite/React-сайта. Старые папки исходного шаблона с jQuery, Sass, PSD и неиспользуемыми ассетами удалены, чтобы заказчик не путался.
+
+## Проверка
+
+```powershell
+rtk powershell -NoProfile -Command "npm run test"
+```
+
+`npm run test` проверяет конфиги и выполняет production-сборку.

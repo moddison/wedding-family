@@ -57,6 +57,10 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+button {
+  font-family: inherit;
+}
+
 main {
   background:
     radial-gradient(circle at 8% 16%, rgba(199, 155, 138, 0.18), transparent 30vw),
@@ -131,6 +135,18 @@ main {
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
+  text-transform: uppercase;
+}
+
+.nav__links button {
+  background: transparent;
+  border: 0;
+  color: rgba(255, 250, 242, 0.88);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0;
   text-transform: uppercase;
 }
 
@@ -211,6 +227,7 @@ main {
 .button {
   align-items: center;
   border: 1px solid transparent;
+  cursor: pointer;
   display: inline-flex;
   font-size: 13px;
   font-weight: 800;
@@ -499,13 +516,12 @@ p {
   background:
     linear-gradient(rgba(46, 42, 38, 0.7), rgba(46, 42, 38, 0.74)),
     var(--rsvp-bg) center/cover;
+  align-items: center;
   color: var(--white);
   display: grid;
-  gap: clamp(28px, 5vw, 58px);
-  grid-template-columns: minmax(280px, 0.62fr) minmax(320px, 0.88fr);
   margin-bottom: 0;
   max-width: none;
-  min-height: 720px;
+  min-height: 620px;
   padding-left: max(clamp(20px, 7vw, 92px), calc((100vw - 1120px) / 2));
   padding-right: max(clamp(20px, 7vw, 92px), calc((100vw - 1120px) / 2));
 }
@@ -530,171 +546,233 @@ p {
   color: rgba(255, 250, 242, 0.86);
   display: flex;
   gap: 10px;
-  grid-column: 1 / -1;
+  margin-top: 42px;
 }
 
-.rsvp-form {
-  background: rgba(255, 250, 242, 0.94);
-  box-shadow: 0 30px 90px rgba(14, 12, 10, 0.24);
-  color: var(--ink);
-  padding: clamp(24px, 4vw, 42px);
+body.modal-open {
+  overflow: hidden;
 }
 
-.form-grid {
+.rsvp-modal {
+  align-items: center;
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(2, 1fr);
+  inset: 0;
+  justify-items: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 50;
 }
 
-.field,
-.question {
+.modal-backdrop {
+  background: rgba(20, 17, 14, 0.68);
   border: 0;
+  cursor: pointer;
+  inset: 0;
+  position: fixed;
+}
+
+.modal-card {
+  background: var(--white);
+  box-shadow: 0 36px 120px rgba(18, 15, 12, 0.38);
+  color: var(--ink);
   display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
+  grid-template-columns: minmax(260px, 0.62fr) minmax(360px, 0.9fr);
+  max-height: min(760px, calc(100svh - 40px));
+  max-width: min(1040px, calc(100vw - 40px));
+  min-height: 620px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  z-index: 1;
 }
 
-.field span,
-.question legend {
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 800;
-  text-transform: uppercase;
+.modal-media {
+  min-height: 100%;
+  position: relative;
 }
 
-.question legend span {
-  color: #a84e42;
-  margin-left: 4px;
+.modal-media::after {
+  background: linear-gradient(180deg, rgba(46, 42, 38, 0.02), rgba(46, 42, 38, 0.34));
+  content: '';
+  inset: 0;
+  position: absolute;
 }
 
-input,
-select,
-textarea {
-  background: #fffaf2;
-  border: 1px solid rgba(46, 42, 38, 0.18);
-  color: var(--ink);
-  font: inherit;
-  min-height: 50px;
-  padding: 13px 14px;
+.modal-media img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
   width: 100%;
 }
 
-textarea {
-  min-height: 112px;
+.modal-content {
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  min-height: 0;
+  padding: clamp(26px, 4vw, 48px);
+  position: relative;
+}
+
+.modal-close {
+  align-items: center;
+  background: rgba(255, 250, 242, 0.9);
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 42px;
+  z-index: 2;
+}
+
+.modal-progress {
+  background: rgba(46, 42, 38, 0.12);
+  height: 2px;
+  margin-bottom: clamp(28px, 5vw, 54px);
+  overflow: hidden;
+}
+
+.modal-progress span {
+  background: var(--sage-deep);
+  display: block;
+  height: 100%;
+  transition: width 260ms ease;
+}
+
+.modal-step,
+.modal-success {
+  align-content: center;
+  display: grid;
+  min-height: 0;
+}
+
+.modal-step h2,
+.modal-success h2 {
+  font-size: clamp(42px, 6vw, 78px);
+}
+
+.modal-step p,
+.modal-success p {
+  margin: 22px 0 0;
+}
+
+.modal-step input,
+.modal-step select,
+.modal-step textarea {
+  background: #fffaf2;
+  border: 1px solid rgba(46, 42, 38, 0.2);
+  color: var(--ink);
+  font: inherit;
+  font-size: clamp(20px, 3vw, 30px);
+  margin-top: 32px;
+  min-height: 64px;
+  padding: 14px 16px;
+  width: 100%;
+}
+
+.modal-step textarea {
+  font-size: 20px;
+  min-height: 150px;
   resize: vertical;
 }
 
-.question-list {
+.modal-choice-list {
   display: grid;
-  gap: 24px;
-  margin: 28px 0;
+  gap: 12px;
+  margin-top: 30px;
 }
 
-.choice-list {
-  display: grid;
-  gap: 10px;
-}
-
-.choice {
+.modal-choice {
   align-items: center;
   background: rgba(247, 241, 231, 0.72);
   border: 1px solid rgba(46, 42, 38, 0.12);
   cursor: pointer;
   display: flex;
-  gap: 11px;
-  padding: 13px 14px;
+  gap: 12px;
+  padding: 15px 16px;
 }
 
-.choice input {
-  accent-color: var(--ink);
+.modal-choice input {
+  accent-color: var(--sage-deep);
   min-height: auto;
   width: 18px;
 }
 
-.form-status {
-  color: var(--sage-deep);
-  font-size: 15px;
-  margin: 18px 0 0;
+.modal-choice span {
+  font-weight: 700;
 }
 
-.form-status--warning {
-  color: #8b5b25;
-}
-
-.admin-panel {
-  background: rgba(255, 250, 242, 0.1);
-  border: 1px solid rgba(255, 250, 242, 0.24);
-  color: var(--white);
-  grid-column: 1 / -1;
-  padding: 18px;
-}
-
-.admin-panel summary {
-  cursor: pointer;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.admin-panel__actions {
+.modal-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 18px 0;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 30px;
 }
 
-.admin-panel button {
-  align-items: center;
-  background: rgba(255, 250, 242, 0.92);
-  border: 0;
+.button--ghost-dark {
+  border-color: rgba(46, 42, 38, 0.22);
   color: var(--ink);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 800;
-  gap: 8px;
-  min-height: 42px;
-  padding: 0 14px;
-  text-transform: uppercase;
 }
 
-.admin-panel button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.responses-table {
+.review-list {
   display: grid;
   gap: 12px;
+  margin-top: 28px;
+  max-height: 300px;
+  overflow: auto;
+  padding-right: 8px;
 }
 
-.response {
-  background: rgba(255, 250, 242, 0.92);
+.review-list p {
+  border-bottom: 1px solid rgba(46, 42, 38, 0.12);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+  padding-bottom: 12px;
+}
+
+.review-list span {
   color: var(--ink);
-  padding: 16px;
-}
-
-.response strong,
-.response small,
-.response p span {
   display: block;
-}
-
-.response small {
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-.response p {
-  font-size: 14px;
-  line-height: 1.55;
-  margin: 12px 0 0;
-}
-
-.response p span {
-  color: var(--ink);
   font-weight: 800;
+}
+
+.modal-message {
+  background: rgba(247, 241, 231, 0.82);
+  margin-top: 18px;
+  padding: 14px;
+}
+
+.modal-message p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.modal-message button {
+  background: transparent;
+  border: 0;
+  color: var(--sage-deep);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  margin-top: 8px;
+  padding: 0;
+}
+
+.success-mark {
+  align-items: center;
+  background: var(--sage-deep);
+  color: var(--white);
+  display: flex;
+  height: 72px;
+  justify-content: center;
+  margin-bottom: 28px;
+  width: 72px;
 }
 
 @keyframes title-rise {
@@ -757,6 +835,21 @@ textarea {
   .note {
     min-height: auto;
   }
+
+  .modal-card {
+    grid-template-columns: 1fr;
+    max-height: calc(100svh - 24px);
+    max-width: calc(100vw - 24px);
+    min-height: calc(100svh - 24px);
+  }
+
+  .modal-media {
+    display: none;
+  }
+
+  .modal-content {
+    padding: 28px 22px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -779,13 +872,19 @@ textarea {
     width: 100%;
   }
 
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
   .hero__actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-step input,
+  .modal-step select,
+  .modal-step textarea {
+    font-size: 18px;
   }
 
   .intro__date {

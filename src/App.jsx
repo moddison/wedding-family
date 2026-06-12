@@ -1,26 +1,19 @@
 import {
   CalendarDays,
   ChevronDown,
-  Clock3,
-  Download,
+  Check,
   ExternalLink,
   Heart,
   MapPin,
   Sparkles,
-  Trash2,
+  X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import Aurora from './components/Aurora';
 import { inviteConfig, surveyConfig } from './config/site';
 import { assetUrl } from './lib/assets';
-import {
-  clearStoredResponses,
-  downloadResponses,
-  readStoredResponses,
-  saveStoredResponse,
-  sendResponseToGoogleSheets,
-} from './lib/rsvpStorage';
+import { sendResponseToGoogleSheets } from './lib/rsvpStorage';
 
 function SectionLabel({ children }) {
   return <span className="section-label">{children}</span>;
@@ -44,7 +37,7 @@ function SplitTitle({ text, as: Tag = 'h1', className = '' }) {
   );
 }
 
-function Hero() {
+function Hero({ onOpenRsvp }) {
   const { hero, couple, date, images } = inviteConfig;
 
   return (
@@ -67,7 +60,7 @@ function Hero() {
           <a href="#program">Программа</a>
           <a href="#dress-code">Дресс-код</a>
           <a href="#location">Локация</a>
-          <a href="#rsvp">RSVP</a>
+          <button type="button" onClick={onOpenRsvp}>RSVP</button>
         </div>
       </nav>
 
@@ -81,9 +74,9 @@ function Hero() {
           <span>WEDDING DAY</span>
         </div>
         <div className="hero__actions">
-          <a className="button button--dark" href="#rsvp">
+          <button className="button button--dark" type="button" onClick={onOpenRsvp}>
             Заполнить анкету
-          </a>
+          </button>
           <a className="button button--ghost" href="#invitation">
             {hero.scrollLabel}
             <ChevronDown aria-hidden="true" size={18} />
@@ -217,6 +210,33 @@ function Notes() {
   );
 }
 
+function RsvpTeaser({ onOpenRsvp }) {
+  const { intro } = surveyConfig;
+
+  return (
+    <section
+      className="rsvp page-section"
+      id="rsvp"
+      style={{ '--rsvp-bg': `url(${assetUrl(inviteConfig.images.hero)})` }}
+    >
+      <div className="rsvp__copy">
+        <SectionLabel>{intro.label}</SectionLabel>
+        <h2>{intro.title}</h2>
+        <p>
+          Просим подтвердить ваше присутствие <strong>{intro.deadline}</strong>{' '}
+          {intro.text}
+        </p>
+        <button className="button button--light" type="button" onClick={onOpenRsvp}>
+          {intro.openButtonText}
+        </button>
+      </div>
+      <div className="rsvp__signature">
+        <span>{inviteConfig.closing}</span>
+      </div>
+    </section>
+  );
+}
+
 function getInitialFormState() {
   const guestFields = Object.fromEntries(
     surveyConfig.guestFields.map((field) => [field.id, '']),
@@ -231,13 +251,19 @@ function getInitialFormState() {
   return { guest: guestFields, answers };
 }
 
+function hasAnswer(question, value) {
+  if (!question.required) return true;
+  if (Array.isArray(value)) return value.length > 0;
+  return String(value || '').trim().length > 0;
+}
+
 function QuestionField({ question, value, onChange }) {
   if (question.type === 'textarea') {
     return (
       <textarea
+        autoFocus
         value={value}
         placeholder={question.placeholder}
-        required={question.required}
         onChange={(event) => onChange(question.id, event.target.value)}
       />
     );
@@ -246,8 +272,8 @@ function QuestionField({ question, value, onChange }) {
   if (question.type === 'select') {
     return (
       <select
+        autoFocus
         value={value}
-        required={question.required}
         onChange={(event) => onChange(question.id, event.target.value)}
       >
         <option value="">Выберите ответ</option>
@@ -262,9 +288,9 @@ function QuestionField({ question, value, onChange }) {
 
   if (question.type === 'checkbox') {
     return (
-      <div className="choice-list">
+      <div className="modal-choice-list">
         {question.options.map((option) => (
-          <label className="choice" key={option}>
+          <label className="modal-choice" key={option}>
             <input
               checked={value.includes(option)}
               type="checkbox"
@@ -283,13 +309,12 @@ function QuestionField({ question, value, onChange }) {
   }
 
   return (
-    <div className="choice-list">
+    <div className="modal-choice-list">
       {question.options.map((option) => (
-        <label className="choice" key={option}>
+        <label className="modal-choice" key={option}>
           <input
             checked={value === option}
             name={question.id}
-            required={question.required}
             type="radio"
             value={option}
             onChange={(event) => onChange(question.id, event.target.value)}
@@ -301,16 +326,40 @@ function QuestionField({ question, value, onChange }) {
   );
 }
 
-function Rsvp() {
+function RsvpModal({ isOpen, onClose }) {
+  const [step, setStep] = useState(0);
   const [formState, setFormState] = useState(getInitialFormState);
-  const [responses, setResponses] = useState([]);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
-  const { intro, storageKey, googleScriptUrl } = surveyConfig;
+  const { intro, googleScriptUrl } = surveyConfig;
+  const steps = useMemo(
+    () => [
+      { kind: 'start', id: 'start' },
+      ...surveyConfig.guestFields.map((field) => ({ kind: 'guest', field, id: field.id })),
+      ...surveyConfig.questions.map((question) => ({ kind: 'question', question, id: question.id })),
+      { kind: 'review', id: 'review' },
+    ],
+    [],
+  );
+  const currentStep = steps[step];
+  const progress = Math.round((step / (steps.length - 1)) * 100);
 
   useEffect(() => {
-    setResponses(readStoredResponses(storageKey));
-  }, [storageKey]);
+    if (!isOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    document.body.classList.add('modal-open');
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.classList.remove('modal-open');
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   const updateGuest = (fieldId, value) => {
     setFormState((current) => ({
@@ -326,150 +375,239 @@ function Rsvp() {
     }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const canGoNext = () => {
+    if (currentStep.kind === 'guest') {
+      if (!currentStep.field.required) return true;
+      return formState.guest[currentStep.field.id].trim().length > 0;
+    }
+
+    if (currentStep.kind === 'question') {
+      return hasAnswer(
+        currentStep.question,
+        formState.answers[currentStep.question.id],
+      );
+    }
+
+    return true;
+  };
+
+  const next = () => {
+    setMessage('');
+    if (step < steps.length - 1 && canGoNext()) {
+      setStep((current) => current + 1);
+    }
+  };
+
+  const back = () => {
+    setMessage('');
+    setStep((current) => Math.max(0, current - 1));
+  };
+
+  const submit = async () => {
+    if (!googleScriptUrl) {
+      setStatus('warning');
+      setMessage(intro.notConfiguredText);
+      return;
+    }
+
     setStatus('sending');
     setMessage('');
 
-    const response = {
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      guest: formState.guest,
-      answers: formState.answers,
-    };
-
-    const nextResponses = saveStoredResponse(storageKey, response);
-    setResponses(nextResponses);
-
     try {
-      await sendResponseToGoogleSheets(googleScriptUrl, response);
+      await sendResponseToGoogleSheets(googleScriptUrl, {
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        guest: formState.guest,
+        questions: surveyConfig.questions.map(({ id, title }) => ({ id, title })),
+        answers: formState.answers,
+      });
       setStatus('success');
       setMessage(intro.successText);
     } catch {
-      setStatus('warning');
+      setStatus('error');
       setMessage(intro.errorText);
     }
-
-    setFormState(getInitialFormState());
   };
 
-  const clearResponses = () => {
-    clearStoredResponses(storageKey);
-    setResponses([]);
+  const restart = () => {
+    setFormState(getInitialFormState());
+    setStep(0);
+    setStatus('idle');
+    setMessage('');
   };
 
   return (
-    <section
-      className="rsvp page-section"
-      id="rsvp"
-      style={{ '--rsvp-bg': `url(${assetUrl(inviteConfig.images.hero)})` }}
-    >
-      <div className="rsvp__copy">
-        <SectionLabel>{intro.label}</SectionLabel>
-        <h2>{intro.title}</h2>
-        <p>
-          Просим подтвердить ваше присутствие <strong>{intro.deadline}</strong>{' '}
-          {intro.text}
-        </p>
-      </div>
-
-      <form className="rsvp-form" onSubmit={handleSubmit}>
-        <div className="form-grid">
-          {surveyConfig.guestFields.map((field) => (
-            <label className="field" key={field.id}>
-              <span>{field.label}</span>
-              <input
-                placeholder={field.placeholder}
-                required={field.required}
-                type={field.type}
-                value={formState.guest[field.id]}
-                onChange={(event) => updateGuest(field.id, event.target.value)}
-              />
-            </label>
-          ))}
-        </div>
-
-        <div className="question-list">
-          {surveyConfig.questions.map((question) => (
-            <fieldset className="question" key={question.id}>
-              <legend>
-                {question.title}
-                {question.required ? <span>*</span> : null}
-              </legend>
-              <QuestionField
-                question={question}
-                value={formState.answers[question.id]}
-                onChange={updateAnswer}
-              />
-            </fieldset>
-          ))}
-        </div>
-
-        <button className="button button--light" disabled={status === 'sending'} type="submit">
-          {status === 'sending' ? 'Отправляем...' : intro.buttonText}
+    <div className="rsvp-modal" role="dialog" aria-modal="true" aria-labelledby="rsvp-modal-title">
+      <button className="modal-backdrop" type="button" aria-label="Закрыть анкету" onClick={onClose} />
+      <div className="modal-card">
+        <button className="modal-close" type="button" aria-label="Закрыть" onClick={onClose}>
+          <X size={20} />
         </button>
+        <div className="modal-media" aria-hidden="true">
+          <img src={assetUrl(inviteConfig.images.hero)} alt="" />
+        </div>
+        <div className="modal-content">
+          <div className="modal-progress" aria-hidden="true">
+            <span style={{ width: `${progress}%` }} />
+          </div>
 
-        {message ? <p className={`form-status form-status--${status}`}>{message}</p> : null}
-      </form>
+          {status === 'success' ? (
+            <div className="modal-success">
+              <div className="success-mark"><Check size={30} /></div>
+              <SectionLabel>{intro.label}</SectionLabel>
+              <h2 id="rsvp-modal-title">Спасибо!</h2>
+              <p>{message}</p>
+              <button className="button button--dark" type="button" onClick={onClose}>
+                Закрыть
+              </button>
+            </div>
+          ) : (
+            <>
+              <StepContent
+                currentStep={currentStep}
+                formState={formState}
+                intro={intro}
+                message={message}
+                onAnswerChange={updateAnswer}
+                onGuestChange={updateGuest}
+                status={status}
+              />
 
-      <AdminResponses
-        responses={responses}
-        onClear={clearResponses}
-        onDownload={() => downloadResponses('rsvp-answers.json', responses)}
-      />
+              <div className="modal-actions">
+                <button
+                  className="button button--ghost-dark"
+                  disabled={step === 0 || status === 'sending'}
+                  type="button"
+                  onClick={back}
+                >
+                  Назад
+                </button>
+                {currentStep.kind === 'review' ? (
+                  <button
+                    className="button button--dark"
+                    disabled={status === 'sending'}
+                    type="button"
+                    onClick={submit}
+                  >
+                    {status === 'sending' ? 'Отправляем...' : intro.submitButtonText}
+                  </button>
+                ) : (
+                  <button
+                    className="button button--dark"
+                    disabled={!canGoNext() || status === 'sending'}
+                    type="button"
+                    onClick={next}
+                  >
+                    {step === 0 ? intro.startButtonText : 'Далее'}
+                  </button>
+                )}
+              </div>
 
-      <div className="rsvp__signature">
-        <Clock3 aria-hidden="true" size={18} />
-        <span>{inviteConfig.closing}</span>
+              {message && status !== 'success' ? (
+                <div className={`modal-message modal-message--${status}`}>
+                  <p>{message}</p>
+                  {status === 'warning' ? (
+                    <button type="button" onClick={restart}>Начать заново</button>
+                  ) : null}
+                </div>
+              ) : null}
+            </>
+          )}
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
 
-function AdminResponses({ responses, onClear, onDownload }) {
-  return (
-    <details className="admin-panel">
-      <summary>Админ: ответы гостей ({responses.length})</summary>
-      <div className="admin-panel__actions">
-        <button type="button" onClick={onDownload} disabled={!responses.length}>
-          <Download size={16} />
-          Скачать JSON
-        </button>
-        <button type="button" onClick={onClear} disabled={!responses.length}>
-          <Trash2 size={16} />
-          Очистить локально
-        </button>
+function StepContent({
+  currentStep,
+  formState,
+  intro,
+  message,
+  onAnswerChange,
+  onGuestChange,
+  status,
+}) {
+  if (currentStep.kind === 'start') {
+    return (
+      <div className="modal-step">
+        <SectionLabel>{intro.label}</SectionLabel>
+        <h2 id="rsvp-modal-title">{intro.modalTitle}</h2>
+        <p>{intro.modalText}</p>
       </div>
-      {responses.length ? (
-        <div className="responses-table">
-          {responses.map((response) => (
-            <article className="response" key={response.id}>
-              <strong>
-                {response.guest.firstName} {response.guest.lastName}
-              </strong>
-              <small>{new Date(response.createdAt).toLocaleString('ru-RU')}</small>
-              {surveyConfig.questions.map((question) => (
-                <p key={question.id}>
-                  <span>{question.title}</span>
-                  {Array.isArray(response.answers[question.id])
-                    ? response.answers[question.id].join(', ')
-                    : response.answers[question.id] || 'нет ответа'}
-                </p>
-              ))}
-            </article>
-          ))}
-        </div>
-      ) : (
-        <p className="muted">Пока нет сохранённых ответов в этом браузере.</p>
-      )}
-    </details>
+    );
+  }
+
+  if (currentStep.kind === 'guest') {
+    const { field } = currentStep;
+
+    return (
+      <div className="modal-step">
+        <SectionLabel>Гость</SectionLabel>
+        <h2 id="rsvp-modal-title">{field.label}</h2>
+        <input
+          autoFocus
+          placeholder={field.placeholder}
+          type={field.type}
+          value={formState.guest[field.id]}
+          onChange={(event) => onGuestChange(field.id, event.target.value)}
+        />
+      </div>
+    );
+  }
+
+  if (currentStep.kind === 'question') {
+    const { question } = currentStep;
+
+    return (
+      <div className="modal-step">
+        <SectionLabel>Вопрос</SectionLabel>
+        <h2 id="rsvp-modal-title">{question.title}</h2>
+        {question.description ? <p>{question.description}</p> : null}
+        <QuestionField
+          question={question}
+          value={formState.answers[question.id]}
+          onChange={onAnswerChange}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="modal-step">
+      <SectionLabel>Проверка</SectionLabel>
+      <h2 id="rsvp-modal-title">Всё верно?</h2>
+      <div className="review-list">
+        {Object.entries(formState.guest).map(([key, value]) => {
+          const field = surveyConfig.guestFields.find((item) => item.id === key);
+          return (
+            <p key={key}>
+              <span>{field?.label || key}</span>
+              {value}
+            </p>
+          );
+        })}
+        {surveyConfig.questions.map((question) => {
+          const value = formState.answers[question.id];
+          return (
+            <p key={question.id}>
+              <span>{question.title}</span>
+              {Array.isArray(value) ? value.join(', ') : value || 'нет ответа'}
+            </p>
+          );
+        })}
+      </div>
+      {message && status === 'error' ? <p className="modal-error">{message}</p> : null}
+    </div>
   );
 }
 
 export default function App() {
+  const [isRsvpOpen, setIsRsvpOpen] = useState(false);
+
   return (
     <>
-      <Hero />
+      <Hero onOpenRsvp={() => setIsRsvpOpen(true)} />
       <main>
         <Intro />
         <Gallery />
@@ -477,8 +615,9 @@ export default function App() {
         <DressCode />
         <Location />
         <Notes />
-        <Rsvp />
+        <RsvpTeaser onOpenRsvp={() => setIsRsvpOpen(true)} />
       </main>
+      <RsvpModal isOpen={isRsvpOpen} onClose={() => setIsRsvpOpen(false)} />
     </>
   );
 }

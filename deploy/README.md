@@ -1,23 +1,33 @@
-# Бесплатный деплой
+# Бесплатный деплой и сбор ответов
 
-## Сайт
+## GitHub Pages
 
-1. Создать GitHub-репозиторий.
-2. Запушить проект в ветку `master`.
-3. В GitHub открыть `Settings -> Pages`.
-4. В `Build and deployment` выбрать `Source: GitHub Actions`.
-5. После пуша workflow `.github/workflows/pages.yml` сам соберёт сайт и опубликует GitHub Pages.
+1. Создайте репозиторий на GitHub.
+2. Запушьте проект в ветку `master`.
+3. Откройте `Settings -> Pages`.
+4. В `Build and deployment` выберите `Source: GitHub Actions`.
+5. После пуша workflow `.github/workflows/pages.yml` соберёт сайт и опубликует GitHub Pages.
 
-## RSVP в Google Sheets
+## Google Таблица для RSVP
 
-1. Создать Google Таблицу.
-2. Открыть `Extensions -> Apps Script`.
-3. Вставить код из `deploy/google-sheets-apps-script.js`.
-4. Нажать `Deploy -> New deployment`.
-5. Тип: `Web app`.
+1. Создайте Google Таблицу.
+2. Откройте `Расширения -> Apps Script`.
+3. Удалите старый код и вставьте содержимое `deploy/google-sheets-apps-script.js`.
+4. Нажмите `Deploy -> New deployment`.
+5. Тип развертывания: `Web app`.
 6. `Execute as`: `Me`.
 7. `Who has access`: `Anyone`.
-8. Скопировать Web app URL.
-9. Вставить URL в `survey.config.js` в поле `googleScriptUrl`.
+8. Нажмите `Deploy`.
+9. Скопируйте Web app URL.
+10. Вставьте URL в `survey.config.js` в поле `googleScriptUrl`.
+11. Запустите `npm run build` и запушьте изменения.
 
-Если `googleScriptUrl` пустой, ответы сохраняются только локально в браузере администратора и доступны в блоке `Админ: ответы гостей`.
+После отправки формы на сайте в таблице появится лист `RSVP`.
+Первые базовые колонки:
+
+- `Дата`
+- `Имя`
+- `Фамилия`
+- `ID`
+
+Колонки под вопросы добавляются автоматически по названиям из `survey.config.js`.
