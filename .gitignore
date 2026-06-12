@@ -3,6 +3,7 @@
 .DS_Store
 *.iws
 /out/
+dist/
 .idea_modules/
 node_modules/
 atlassian-ide-plugin.xml

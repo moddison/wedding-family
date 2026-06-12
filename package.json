@@ -1,33 +1,22 @@
 {
-  "name": "wedding-website",
-  "version": "1.0.1",
-  "description": "A wedding website with loads of features.",
-  "main": "npmfile.js",
+  "name": "danil-natalia-wedding-invite",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Настраиваемое свадебное приглашение Данила и Натальи.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com:rampatra/wedding-website.git"
-  },
-  "keywords": [
-    "wedding",
-    "template",
-    "website template"
-  ],
-  "author": "Ram Patra",
-  "license": "GPL-3.0",
-  "homepage": "https://github.com/rampatra/wedding-website",
-  "devDependencies": {
-    "gulp": "^4.0.2",
-    "gulp-rename": "^1.4.0",
-    "gulp-sass": "^5.0.0",
-    "gulp-uglify": "^3.0.2",
-    "sass": "^1.25.0"
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vite build"
   },
   "dependencies": {
-    "animate.css": "^3.7.2",
-    "font-awesome": "^4.7.0",
-    "waypoints": "^4.0.1"
-  }
+    "@vitejs/plugin-react": "^6.0.2",
+    "vite": "^8.0.16",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "lucide-react": "^1.18.0",
+    "ogl": "^1.0.11"
+  },
+  "devDependencies": {}
 }

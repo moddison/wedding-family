@@ -1,61 +1,60 @@
-# Wedding Website
-A beautiful, feature rich, device friendly wedding website.  
-_See [wedding.rampatra.com](http://wedding.rampatra.com/) for a demo. Use invite code `271117` to RSVP._
+# Свадебное приглашение Данила и Натальи
 
-# Highlights
-1. Slick and fully __responsive__ design.
-2. __RSVP feature__ which directly uploads data to a Google sheet.
-3. __Receive email alerts__ when someone RSVPs.
-4. __Add to Calendar__ feature which supports four different calendars.
-5. __Book Uber__ button lets guests book a cab to the venue with just a single tap.
-6. A nice __Youtube video__ showing your venue.
-7. __Google Map__ showing your venue's location.
-8. Start and run the website __completely free__. No hosting, backend server, or database required as you can use
-   [GitHub Pages](https://pages.github.com/) to host and Google sheets (with the help of Google scripts) to store RSVP
-   data.
+Настраиваемый сайт-приглашение на свадьбу. Основа взята из `rampatra/wedding-website`, но текущая версия переведена на Vite + React и русские тексты.
 
-# Getting Started
-1. `$ git clone https://github.com/rampatra/wedding-website.git` - clone this project to your computer
-2. `$ cd wedding-website` - go inside the project directory
-3. `$ npm install` - install dependencies
-4. `$ gulp` - compile sass to css, minify js, etc.
-5. That's it, open `index.html` file on your browser by just double-clicking on it.
+## Запуск
 
-# Documentation
-I have written a 
-[blog post describing all the features of this wedding website](https://blog.rampatra.com/wedding-website) and how to
-customize each of them according to your needs.
+```powershell
+rtk powershell -NoProfile -Command "npm install"
+rtk powershell -NoProfile -Command "npm run dev"
+rtk powershell -NoProfile -Command "npm run build"
+```
 
-# About Me
-Hello, my name is Ram. I am a Director of Software Engineering at [Mastercard](https://www.mastercard.com/). I enjoy making teeny tiny applications in
-my leisure time and this is one of them. Now that my wedding is over, I am open-sourcing the project. Hope you like it!
+`npm run test` сейчас запускает production-сборку, потому что отдельных unit-тестов в проекте нет.
 
-# Sponsors
-Proudly sponsored by these awesome apps. Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://x.com/rampatra_)]
+## Структура
 
-<table>
-    <tr>
-        <td>
-            <a href="https://presentifyapp.com/" target="_blank"><img src="https://raw.githubusercontent.com/rampatra/assets/refs/heads/main/Presentify/Icons/icon_512.png" width="150" height="150"></a>
-        </td>
-        <td>
-            <a href="https://facescreenapp.com/" target="_blank"><img src="https://github.com/user-attachments/assets/b251b413-ccc4-48f1-a316-c2c2a71f959e" width="150" height="150"></a>
-        </td>
-        <td>
-            <a href="https://keyscreenapp.com" target="_blank"><img src="https://github.com/user-attachments/assets/4b75a739-b4b5-432c-a03c-a9bdd8309934" width="150" height="150"></a>
-        </td>
-        <td>
-            <a href="https://todobarapp.com/" target="_blank"><img src="https://todobarapp.com/assets/img/todobar/app-icon-512.png" width="150" height="150"></a>
-        </td>
-        <td>
-            <a href="https://simplefillapp.com/" target="_blank"><img src="https://github.com/user-attachments/assets/6c575d9c-b65b-4ce7-a468-30f74cfedf18" width="150" height="150"></a>
-        </td>
-    </tr>
-</table>
+- `src/invitation.config.js` - главный файл настройки текста, даты, адреса, программы, дресс-кода и RSVP.
+- `src/App.jsx` - секции приглашения.
+- `src/styles.css` - визуальный стиль, адаптив и анимации.
+- `src/components/Aurora.jsx` - WebGL-фон, адаптирован из React Bits Aurora.
+- `src/components/Magnet.jsx` - магнитная кнопка, адаптирована из React Bits Magnet.
+- `public/images/wedding-hero.png` - сгенерированный нейтральный hero-фон без людей и текста.
+- `dist/` - результат `npm run build`, не редактировать вручную.
 
-# Contribute
-First, a big thank you 🙏🏻 for the overwhelming response on [Hacker News](https://news.ycombinator.com/item?id=18556787) and [Reddit](https://www.reddit.com/r/opensource/comments/a1bx4h/i_am_open_sourcing_my_wedding_website_on_my_first/). If you'd like to contribute to the project, feel free to create a [PR](https://help.github.com/articles/about-pull-requests/). To support my work, you can buy one of the apps listed under the "Sponsors" section or click the button below.
+## Быстрая настройка
 
-<a href="https://www.buymeacoffee.com/rampatra" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+Все основные данные меняются в `src/invitation.config.js`.
 
-_P.S. For any queries or concerns, you can reach out to me on [Twitter](https://twitter.com/rampatra_). I'll try my best to help._
+Перед отправкой гостям обязательно заменить:
+
+- `location.name`
+- `location.address`
+- `location.mapUrl`
+- `notes[2].text` с контактом организатора или близкого человека
+- `rsvp.formUrl`, если будет Google Form / Яндекс Форма / другая анкета
+
+Если `rsvp.formUrl` пустой, кнопка RSVP открывает черновик письма через `mailto:`.
+
+## Архитектура
+
+Проект статический: React собирается в HTML/CSS/JS через Vite. Это удобно для бесплатного размещения на GitHub Pages, Netlify, Vercel или любом статическом хостинге.
+
+GitHub Actions `.github/workflows/pages.yml` собирает `dist` и публикует сайт на GitHub Pages при пуше в `master`. В настройках репозитория нужно включить Pages с источником `GitHub Actions`.
+
+Визуальная идея: премиальное бумажное приглашение с живым WebGL-светом в духе React Bits, крупной типографикой и простым сценарным скроллом: приглашение, программа, дресс-код, локация, важные заметки, RSVP.
+
+## Зависимости
+
+- `react`, `react-dom` - интерфейс.
+- `vite`, `@vitejs/plugin-react` - сборка и dev-сервер.
+- `ogl` - WebGL для Aurora-фона.
+- `lucide-react` - иконки.
+
+React Bits компоненты используются внутри сайта. Их лицензия: MIT + Commons Clause, то есть можно использовать в приложении/сайте, но нельзя продавать или распространять сами компоненты как библиотеку.
+
+## Заметки
+
+- Старый `CNAME` шаблона удалён, чтобы GitHub Pages не указывал на домен автора.
+- Чужие фотографии из исходного шаблона не используются как главный фон, чтобы приглашение не выглядело как замена имён на чужой фотосессии.
+- Тексты адаптированы по структуре примера `einvited.ru/airat-venera-07-08`: `LOCATION`, `PROGRAM`, `DRESS CODE`, `18+`, `CONTACTS`, `FLOWERS`, `RSVP`.
