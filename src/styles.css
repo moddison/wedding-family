@@ -116,7 +116,6 @@ main {
   height: 54px;
   justify-content: center;
   letter-spacing: 0;
-  margin-bottom: 14px;
   text-decoration: none;
   width: 54px;
 }
@@ -229,7 +228,7 @@ main {
 }
 
 .button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .button--dark {
@@ -246,6 +245,12 @@ main {
   background: var(--white);
   box-shadow: 0 18px 50px rgba(20, 18, 15, 0.18);
   color: var(--ink);
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+  transform: none;
 }
 
 .intro {
@@ -320,6 +325,36 @@ p {
   line-height: 1.6;
   margin: 28px 0 0;
   max-width: 760px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr 1fr;
+  margin: 0 auto;
+  max-width: 1240px;
+  padding: 0 clamp(20px, 5vw, 68px) clamp(76px, 10vw, 132px);
+}
+
+.gallery__item {
+  aspect-ratio: 4 / 5;
+  margin: 0;
+  overflow: hidden;
+}
+
+.gallery__item:nth-child(2) {
+  margin-top: 70px;
+}
+
+.gallery__item:nth-child(3) {
+  margin-top: 28px;
+}
+
+.gallery__item img {
+  display: block;
+  filter: saturate(0.82) contrast(1.04);
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
 }
 
 .page-section {
@@ -463,11 +498,14 @@ p {
 .rsvp {
   background:
     linear-gradient(rgba(46, 42, 38, 0.7), rgba(46, 42, 38, 0.74)),
-    url('/images/wedding-hero.png') center/cover;
+    var(--rsvp-bg) center/cover;
   color: var(--white);
+  display: grid;
+  gap: clamp(28px, 5vw, 58px);
+  grid-template-columns: minmax(280px, 0.62fr) minmax(320px, 0.88fr);
   margin-bottom: 0;
   max-width: none;
-  min-height: 620px;
+  min-height: 720px;
   padding-left: max(clamp(20px, 7vw, 92px), calc((100vw - 1120px) / 2));
   padding-right: max(clamp(20px, 7vw, 92px), calc((100vw - 1120px) / 2));
 }
@@ -492,7 +530,171 @@ p {
   color: rgba(255, 250, 242, 0.86);
   display: flex;
   gap: 10px;
-  margin-top: 52px;
+  grid-column: 1 / -1;
+}
+
+.rsvp-form {
+  background: rgba(255, 250, 242, 0.94);
+  box-shadow: 0 30px 90px rgba(14, 12, 10, 0.24);
+  color: var(--ink);
+  padding: clamp(24px, 4vw, 42px);
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.field,
+.question {
+  border: 0;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.field span,
+.question legend {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.question legend span {
+  color: #a84e42;
+  margin-left: 4px;
+}
+
+input,
+select,
+textarea {
+  background: #fffaf2;
+  border: 1px solid rgba(46, 42, 38, 0.18);
+  color: var(--ink);
+  font: inherit;
+  min-height: 50px;
+  padding: 13px 14px;
+  width: 100%;
+}
+
+textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.question-list {
+  display: grid;
+  gap: 24px;
+  margin: 28px 0;
+}
+
+.choice-list {
+  display: grid;
+  gap: 10px;
+}
+
+.choice {
+  align-items: center;
+  background: rgba(247, 241, 231, 0.72);
+  border: 1px solid rgba(46, 42, 38, 0.12);
+  cursor: pointer;
+  display: flex;
+  gap: 11px;
+  padding: 13px 14px;
+}
+
+.choice input {
+  accent-color: var(--ink);
+  min-height: auto;
+  width: 18px;
+}
+
+.form-status {
+  color: var(--sage-deep);
+  font-size: 15px;
+  margin: 18px 0 0;
+}
+
+.form-status--warning {
+  color: #8b5b25;
+}
+
+.admin-panel {
+  background: rgba(255, 250, 242, 0.1);
+  border: 1px solid rgba(255, 250, 242, 0.24);
+  color: var(--white);
+  grid-column: 1 / -1;
+  padding: 18px;
+}
+
+.admin-panel summary {
+  cursor: pointer;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.admin-panel button {
+  align-items: center;
+  background: rgba(255, 250, 242, 0.92);
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  text-transform: uppercase;
+}
+
+.admin-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.responses-table {
+  display: grid;
+  gap: 12px;
+}
+
+.response {
+  background: rgba(255, 250, 242, 0.92);
+  color: var(--ink);
+  padding: 16px;
+}
+
+.response strong,
+.response small,
+.response p span {
+  display: block;
+}
+
+.response small {
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.response p {
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 12px 0 0;
+}
+
+.response p span {
+  color: var(--ink);
+  font-weight: 800;
 }
 
 @keyframes title-rise {
@@ -523,8 +725,21 @@ p {
   .intro,
   .location,
   .notes,
-  .dress__notes {
+  .dress__notes,
+  .rsvp {
     grid-template-columns: 1fr;
+  }
+
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery__item:nth-child(n) {
+    margin-top: 0;
+  }
+
+  .gallery__item {
+    aspect-ratio: 16 / 11;
   }
 
   .intro__date {
@@ -562,6 +777,10 @@ p {
   .button {
     min-height: 50px;
     width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 
   .hero__actions {

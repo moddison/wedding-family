@@ -1,4 +1,4 @@
-export const invitation = {
+export const inviteConfig = {
   couple: {
     groom: 'Данил',
     bride: 'Наталья',
@@ -11,13 +11,16 @@ export const invitation = {
     year: '2026',
     full: '7 августа 2026',
   },
+  images: {
+    hero: '/wedding-hero.png',
+    gallery: ['/photo-1.jpg', '/photo-2.jpg', '/photo-3.jpg'],
+  },
   hero: {
     eyebrow: 'приглашение на свадьбу',
     title: 'Данил & Наталья',
     subtitle:
       'В нашей жизни предстоят счастливые перемены, и нам очень хочется разделить этот день с самыми близкими.',
     scrollLabel: 'Листайте ниже',
-    image: '/images/wedding-hero.png',
   },
   invitationText:
     'Мы приглашаем вас на наш первый семейный праздник - нашу свадьбу. Будем счастливы видеть вас рядом в этот важный для нас день.',
@@ -26,7 +29,7 @@ export const invitation = {
     title: 'Место праздника',
     name: 'Название площадки',
     address: 'Город, улица, дом',
-    note: 'Замените адрес в src/invitation.config.js, когда площадка будет утверждена.',
+    note: 'Замените адрес и ссылку на карту в invite.config.js, когда площадка будет утверждена.',
     mapUrl: 'https://maps.google.com',
   },
   program: {
@@ -82,14 +85,5 @@ export const invitation = {
         'Если в день свадьбы появятся вопросы, напишите нашему организатору или близкому человеку. Контакт можно указать здесь.',
     },
   ],
-  rsvp: {
-    label: 'RSVP',
-    title: 'Подтвердите присутствие',
-    deadline: 'до 7 июля 2026 г.',
-    text:
-      'Чтобы сделать событие комфортным для вас и для нас, ответьте, пожалуйста, на несколько вопросов.',
-    buttonText: 'Заполнить анкету',
-    formUrl: '',
-  },
   closing: 'До скорой встречи!',
 };
